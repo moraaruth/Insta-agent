@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "Failed to create conversation" }, { status: 500 });
     }
 
-    // Store user message (ignore duplicates)
+    // Store user message (ignore duplicates via unique constraint on instagram_msg_id)
     const { error: insertError } = await supabase.from("instagram_messages").insert({
       conversation_id: conversation.id,
       role: "user",
@@ -84,9 +84,12 @@ export async function POST(request: NextRequest) {
       instagram_msg_id: instagramMsgId,
     });
 
-    if (insertError?.code === "23505") {
-      // Duplicate message, ignore
-      return Response.json({ status: "duplicate" });
+    if (insertError) {
+      // 23505 = unique violation (duplicate message)
+      if (insertError.code === "23505") {
+        return Response.json({ status: "duplicate" });
+      }
+      throw insertError;
     }
 
     // Update conversation timestamp
