@@ -8,10 +8,8 @@ const openai = new OpenAI({
 
 const FALLBACK_MODELS = [
   process.env.AI_MODEL,
-  "google/gemma-3-12b-it:free",
-  "google/gemma-3-4b-it:free",
-  "google/gemma-2-9b-it:free",
   "mistralai/mistral-small-3.1-24b-instruct:free",
+  "google/gemma-3-12b-it:free",
 ].filter(Boolean) as string[];
 
 export async function getAIResponse(
@@ -24,7 +22,7 @@ export async function getAIResponse(
 
   for (const model of FALLBACK_MODELS) {
     try {
-      const completion = await openai.chat.completions.create({ model, messages: payload });
+      const completion = await openai.chat.completions.create({ model, messages: payload, temperature: 0.3 });
       return completion.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
     } catch (err: unknown) {
       const status = (err as { status?: number }).status;
