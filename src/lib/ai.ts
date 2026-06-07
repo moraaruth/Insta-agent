@@ -22,7 +22,13 @@ export async function getAIResponse(
 
   for (const model of FALLBACK_MODELS) {
     try {
-      const completion = await openai.chat.completions.create({ model, messages: payload, temperature: 0.3 });
+      const completion = await openai.chat.completions.create({ 
+        model, 
+        messages: payload, 
+        temperature: 0.7,
+        max_tokens: 500,
+        top_p: 0.95,
+      });
       return completion.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
     } catch (err: unknown) {
       const status = (err as { status?: number }).status;
